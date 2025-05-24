@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from "react-router-dom";
+import axios from "axios";
+
+axios.defaults.baseURL = "https://monjez-online.onrender.com";
 
 /* ─── Common Components ───────────────────────────────────────────── */
 import Header from "./components/Header";
