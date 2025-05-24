@@ -8,6 +8,7 @@ import OrderDetails from './OrderDetails';
 import Charts from './Charts';
 import Notifications from './Notifications';
 import InboxPage from './InboxPage';
+import axios from 'axios';
 
 
 
@@ -20,26 +21,31 @@ export default function MyOrdersLayout() {
   const [activeTab, setActiveTab] = useState('orders');
   
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+ useEffect(() => {
+  const token = localStorage.getItem('token');
+  if (!token) return;
 
-    // جلب بيانات العضو
-    fetch('/api/user/me', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(setUser)
-      .catch(() => setUser(null));
+  // جلب بيانات العضو
+  axios.get('/api/user/me', {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  .then((res) => setUser(res.data))
+  .catch((err) => {
+    console.error('Error fetching user data:', err);
+    setUser(null);
+  });
 
-    // جلب إحصائيات الطلبات
-    fetch('/api/my-orders/stats', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(setStats)
-      .catch(() => setStats(null));
-  }, []);
+  // جلب إحصائيات الطلبات
+  axios.get('/api/my-orders/stats', {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  .then((res) => setStats(res.data))
+  .catch((err) => {
+    console.error('Error fetching stats:', err);
+    setStats(null);
+  });
+
+}, []);
 
   return (
     <div style={{
