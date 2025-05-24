@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import axios from 'axios';
 // ألوان الحالات بشكل أنعم وحديث
 const statusColors = {
   pending:   { bg: '#fff7e6', color: '#f7b731' },
@@ -184,32 +184,30 @@ function OrderList() {
   const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setError('يجب تسجيل الدخول أولاً');
-      setLoading(false);
-      return;
-    }
+  const token = localStorage.getItem('token');
+  if (!token) {
+    setError('يجب تسجيل الدخول أولاً');
+    setLoading(false);
+    return;
+  }
 
-    fetch('/api/my-orders', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          if (res.status === 401) throw new Error('انتهت صلاحية الجلسة، سجل دخولك مجددًا');
-          throw new Error('حدث خطأ أثناء جلب الطلبات');
-        }
-        const data = await res.json();
-        setOrders(data.orders || []);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
+  axios.get('/api/my-orders', {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  .then((res) => {
+    setOrders(res.data.orders || []);
+    setLoading(false);
+  })
+  .catch((err) => {
+    console.error(err);
+    if (err.response?.status === 401) {
+      setError('انتهت صلاحية الجلسة، سجل دخولك مجددًا');
+    } else {
+      setError('حدث خطأ أثناء جلب الطلبات');
+    }
+    setLoading(false);
+  });
+}, []);
 
   if (loading) {
     return <div style={{ textAlign: 'center', padding: '40px' }}>جاري تحميل الطلبات...</div>;
